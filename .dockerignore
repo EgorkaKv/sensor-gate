@@ -67,4 +67,3 @@ credentials/
 *.json
 
 # Poetry
-poetry.lock
