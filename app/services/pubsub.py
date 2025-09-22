@@ -103,15 +103,22 @@ class PubSubService:
                 print('Mock Pub/Sub client initialized successfully')
             else:
                 # Initialize real Google Cloud Pub/Sub client
-                # if settings.gcp_credentials_path:
-                #     import os
-                #     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = settings.gcp_credentials_path
+                import os
+
+                # Set credentials path only if file exists (for local development)
+                if (settings.gcp_credentials_path and
+                    os.path.exists(settings.gcp_credentials_path)):
+                    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = settings.gcp_credentials_path
+                    print(f'Using service account file: {settings.gcp_credentials_path}')
+                else:
+                    # Use Application Default Credentials (Cloud Run, gcloud auth, etc.)
+                    print('Using Application Default Credentials')
 
                 self.client = pubsub_v1.PublisherClient()
                 print('Real Pub/Sub client initialized successfully')
 
         except Exception as e:
-            print('Error initializing Pub/Sub client:', e)
+            print(f'Error initializing Pub/Sub client: {e}')
             raise
 
     def get_topic_path(self, sensor_type: str) -> str:

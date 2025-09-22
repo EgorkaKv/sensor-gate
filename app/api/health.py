@@ -55,14 +55,12 @@ async def health_check(
         },
         "config": {
             "supported_sensor_types": list(settings.sensor_topic_mapping.keys()),
-            "metrics_enabled": settings.metrics_enabled,
             "debug_mode": settings.debug,
             "public_access_enabled": settings.public_access_enabled,
             "features": {
                 "data_ingestion": True,
                 "historical_queries": True,
                 "device_management": True,
-                "aggregated_analytics": True
             }
         }
     }
