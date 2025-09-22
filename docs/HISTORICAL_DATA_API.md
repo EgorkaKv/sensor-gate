@@ -2,87 +2,87 @@
 
 ## Overview
 
-SensorGate теперь поддерживает получение исторических данных с датчиков из InfluxDB Cloud. Добавлены новые эндпоинты для различных сценариев запросов.
+SensorGate now supports retrieving historical sensor data from InfluxDB Cloud. New endpoints have been added for various query scenarios.
 
-## Новые эндпоинты
+## New Endpoints
 
-### 1. Получение исторических данных
+### 1. Retrieve Historical Data
 **GET** `/api/v1/sensors/history`
 
-Базовый эндпоинт для получения исторических данных с фильтрацией.
+Base endpoint for retrieving historical data with filtering.
 
-**Параметры:**
-- `start_time` (обязательный): Начальное время в ISO 8601 формате
-- `end_time` (обязательный): Конечное время в ISO 8601 формате
-- `sensor_type` (опционально): Тип датчика (temperature, humidity, ndir)
-- `device_id` (опционально): ID конкретного устройства
-- `latitude_min/max` (опционально): Фильтр по широте
-- `longitude_min/max` (опционально): Фильтр по долготе
+**Parameters:**
+- `start_time` (required): Start time in ISO 8601 format
+- `end_time` (required): End time in ISO 8601 format
+- `sensor_type` (optional): Sensor type (temperature, humidity, ndir)
+- `device_id` (optional): Specific device ID
+- `latitude_min/max` (optional): Latitude filter
+- `longitude_min/max` (optional): Longitude filter
 
-**Пример запроса:**
+**Example request:**
 ```http
 GET /api/v1/sensors/history?start_time=2024-01-15T12:00:00Z&end_time=2024-01-15T13:00:00Z&sensor_type=temperature
 ```
 
-### 2. Получение агрегированных данных
+### 2. Retrieve Aggregated Data
 **GET** `/api/v1/sensors/history/aggregated`
 
-Получение агрегированных данных с различными типами агрегации.
+Retrieve aggregated data with various aggregation types.
 
-**Дополнительные параметры:**
-- `aggregation`: Тип агрегации (mean, min, max, count, sum, first, last)
+**Additional parameters:**
+- `aggregation`: Aggregation type (mean, min, max, count, sum, first, last)
 
-**Пример запроса:**
+**Example request:**
 ```http
 GET /api/v1/sensors/history/aggregated?start_time=2024-01-15T00:00:00Z&end_time=2024-01-15T23:59:59Z&aggregation=mean&sensor_type=temperature
 ```
 
-### 3. Данные по типу датчика
+### 3. Data by Sensor Type
 **GET** `/api/v1/sensors/history/by-sensor-type/{sensor_type}`
 
-Получение данных для всех устройств определенного типа датчика.
+Retrieve data for all devices of a specific sensor type.
 
-**Пример запроса:**
+**Example request:**
 ```http
 GET /api/v1/sensors/history/by-sensor-type/temperature?start_time=2024-01-15T12:00:00Z&end_time=2024-01-15T13:00:00Z
 ```
 
-### 4. Данные по ID устройства
+### 4. Data by Device ID
 **GET** `/api/v1/sensors/history/by-device/{device_id}`
 
-Получение данных для конкретного устройства.
+Retrieve data for a specific device.
 
-**Пример запроса:**
+**Example request:**
 ```http
 GET /api/v1/sensors/history/by-device/12345?start_time=2024-01-15T12:00:00Z&end_time=2024-01-15T13:00:00Z
 ```
 
-### 5. Список всех устройств
+### 5. List All Devices
 **GET** `/api/v1/sensors/devices`
 
-Получение списка всех устройств с метаданными.
+Retrieve a list of all devices with metadata.
 
-**Параметры:**
-- `sensor_type` (опционально): Фильтр по типу датчика
+**Parameters:**
+- `sensor_type` (optional): Filter by sensor type
 
-**Пример запроса:**
+**Example request:**
 ```http
 GET /api/v1/sensors/devices?sensor_type=temperature
 ```
 
-### 6. Статистика по типам датчиков
+### 6. Sensor Type Statistics
 **GET** `/api/v1/sensors/stats`
 
-Получение общей статистики по всем типам датчиков.
+Retrieve general statistics for all sensor types.
 
-**Пример запроса:**
+**Example request:**
 ```http
 GET /api/v1/sensors/stats
 ```
 
-## Формат ответов
+## Response Formats
 
-### Исторические данные
+### Historical Data
 ```json
 {
   "data": [
@@ -101,7 +101,7 @@ GET /api/v1/sensors/stats
 }
 ```
 
-### Агрегированные данные
+### Aggregated Data
 ```json
 {
   "data": [
@@ -121,7 +121,7 @@ GET /api/v1/sensors/stats
 }
 ```
 
-### Список устройств
+### Device List
 ```json
 {
   "devices": [
@@ -142,19 +142,19 @@ GET /api/v1/sensors/stats
 }
 ```
 
-## Примеры использования
+## Usage Examples
 
-### Python клиент
+### Python Client
 ```python
 import requests
 from datetime import datetime, timedelta
 
-# Настройки
+# Configuration
 API_BASE_URL = "http://your-sensorgate-domain/api/v1"
 API_KEY = "your-api-key"
 headers = {"X-API-Key": API_KEY}
 
-# Получить данные за последний час
+# Get data from the last hour
 end_time = datetime.utcnow()
 start_time = end_time - timedelta(hours=1)
 
@@ -172,32 +172,32 @@ response = requests.get(
 
 if response.status_code == 200:
     data = response.json()
-    print(f"Получено {data['total_count']} точек данных")
+    print(f"Retrieved {data['total_count']} data points")
     for point in data['data']:
-        print(f"Устройство {point['device_id']}: {point['value']}°C в {point['timestamp']}")
+        print(f"Device {point['device_id']}: {point['value']}°C at {point['timestamp']}")
 ```
 
-### cURL примеры
+### cURL Examples
 ```bash
-# Получить температурные данные за последний час
+# Get temperature data from the last hour
 curl -X GET "http://your-domain/api/v1/sensors/history?start_time=2024-01-15T12:00:00Z&end_time=2024-01-15T13:00:00Z&sensor_type=temperature" \
   -H "X-API-Key: your-api-key"
 
-# Получить агрегированные данные (среднее)
+# Get aggregated data (mean)
 curl -X GET "http://your-domain/api/v1/sensors/history/aggregated?start_time=2024-01-15T00:00:00Z&end_time=2024-01-15T23:59:59Z&aggregation=mean" \
   -H "X-API-Key: your-api-key"
 
-# Получить список устройств
+# Get device list
 curl -X GET "http://your-domain/api/v1/sensors/devices" \
   -H "X-API-Key: your-api-key"
 ```
 
-## Конфигурация InfluxDB
+## InfluxDB Configuration
 
-Добавьте в ваш `.env` файл:
+Add to your `.env` file:
 
 ```env
-# InfluxDB настройки
+# InfluxDB settings
 SENSORGATE_INFLUXDB_URL=https://us-east-1-1.aws.cloud2.influxdata.com
 SENSORGATE_INFLUXDB_TOKEN=GdqEFmuTLknVX_WxJgeJVekhjKN555UBk2A38zFmKdvpz473K64HsYGukC_XtDQXvOF6gX2hafgI9YfqHSDGFw==
 SENSORGATE_INFLUXDB_ORG=IoT-lab3
@@ -208,19 +208,19 @@ SENSORGATE_INFLUXDB_PASSWORD=influx321pass
 
 ## Health Check
 
-Обновленный health check теперь включает проверку InfluxDB:
+The updated health check now includes InfluxDB verification:
 
 ```http
 GET /api/v1/health
 ```
 
-Ответ будет включать статус как Pub/Sub, так и InfluxDB соединений.
+The response will include status for both Pub/Sub and InfluxDB connections.
 
-## Мониторинг
+## Monitoring
 
-Новые метрики добавлены для исторических запросов:
+New metrics have been added for historical queries:
 - `sensorgate_sensor_data_received_total{sensor_type="history_query"}`
 - `sensorgate_sensor_data_processed_total{sensor_type="history_query"}`
 - `sensorgate_sensor_data_errors_total{sensor_type="history_query"}`
 
-Аналогично для других типов запросов (aggregated_query, device_list, sensor_stats).
+Similarly for other query types (aggregated_query, device_list, sensor_stats).

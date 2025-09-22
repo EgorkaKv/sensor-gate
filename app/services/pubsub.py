@@ -4,8 +4,6 @@ from typing import Dict, Any, Optional
 from enum import Enum
 
 from app.config import settings
-# from app.core.logging import LoggerMixin, log_pubsub_publish_success, log_pubsub_publish_error
-# from app.core.metrics import MetricsCollector
 
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
@@ -105,9 +103,9 @@ class PubSubService:
                 print('Mock Pub/Sub client initialized successfully')
             else:
                 # Initialize real Google Cloud Pub/Sub client
-                if settings.gcp_credentials_path:
-                    import os
-                    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = settings.gcp_credentials_path
+                # if settings.gcp_credentials_path:
+                #     import os
+                #     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = settings.gcp_credentials_path
 
                 self.client = pubsub_v1.PublisherClient()
                 print('Real Pub/Sub client initialized successfully')
@@ -144,20 +142,10 @@ class PubSubService:
                 message_data
             )
 
-            # log_pubsub_publish_success(
-            #     topic=topic_path.split('/')[-1],
-            #     message_id=message_id,
-            #     device_id=data.get('device_id', 0)
-            # )
-
             return message_id
 
         except Exception as e:
-            # log_pubsub_publish_error(
-            #     topic=topic_path.split('/')[-1],
-            #     device_id=data.get('device_id', 0),
-            #     error=e
-            # )
+            print('Error publishing message to Pub/Sub:', e)
             raise
 
     @retry(

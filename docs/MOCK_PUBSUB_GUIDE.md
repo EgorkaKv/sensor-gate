@@ -1,82 +1,82 @@
-# Мок Google Cloud Pub/Sub для локальной разработки
+# Mock Google Cloud Pub/Sub for Local Development
 
-## Обзор
+## Overview
 
-SensorGate теперь поддерживает мок Google Cloud Pub/Sub для удобной локальной разработки и тестирования без необходимости подключения к реальному GCP Pub/Sub сервису.
+SensorGate now supports mock Google Cloud Pub/Sub for convenient local development and testing without the need to connect to a real GCP Pub/Sub service.
 
-## Функциональность мока
+## Mock Functionality
 
-### ✅ Полная совместимость с API
-- Мок полностью совместим с интерфейсом Google Cloud Pub/Sub
-- Поддерживает все методы: `publish()`, `get_topic()`, `topic_path()`
-- Возвращает те же типы данных, что и реальный клиент
+### ✅ Full API Compatibility
+- Mock is fully compatible with the Google Cloud Pub/Sub interface
+- Supports all methods: `publish()`, `get_topic()`, `topic_path()`
+- Returns the same data types as the real client
 
-### ✅ Автоматическое переключение
-- Автоматически активируется в debug режиме
-- Можно принудительно включить через переменную окружения
-- Прозрачное переключение между реальным и мок сервисом
+### ✅ Automatic Switching
+- Automatically activates in debug mode
+- Can be forcibly enabled via environment variable
+- Transparent switching between real and mock service
 
-### ✅ Полное логирование
-- Детальное логирование всех "отправленных" сообщений
-- Структурированные логи с метаданными сообщений
-- JSON формат для удобного анализа
+### ✅ Complete Logging
+- Detailed logging of all "sent" messages
+- Structured logs with message metadata
+- JSON format for easy analysis
 
 ### ✅ Debug API
-- Специальные эндпоинты для просмотра отправленных сообщений
-- Статистика по топикам и сообщениям
-- Возможность очистки данных для тестирования
+- Special endpoints for viewing sent messages
+- Statistics by topics and messages
+- Ability to clear data for testing
 
-## Настройка и использование
+## Setup and Usage
 
-### Конфигурация
+### Configuration
 
-Основные переменные окружения:
+Main environment variables:
 
 ```env
-# Принудительно включить мок (по умолчанию false)
+# Force enable mock (default false)
 SENSORGATE_USE_PUBSUB_MOCK=true
 
-# Автоматически включать мок в debug режиме (по умолчанию true)
+# Automatically enable mock in debug mode (default true)
 SENSORGATE_PUBSUB_MOCK_AUTO_ENABLE=true
 
-# Debug режим (автоматически активирует мок если PUBSUB_MOCK_AUTO_ENABLE=true)
+# Debug mode (automatically activates mock if PUBSUB_MOCK_AUTO_ENABLE=true)
 SENSORGATE_DEBUG=true
 ```
 
-### Автоматическая активация
+### Automatic Activation
 
-Мок автоматически активируется в следующих случаях:
+Mock automatically activates in the following cases:
 
-1. **Debug режим** + `PUBSUB_MOCK_AUTO_ENABLE=true` (по умолчанию)
-2. **Принудительная активация** через `USE_PUBSUB_MOCK=true`
+1. **Debug mode** + `PUBSUB_MOCK_AUTO_ENABLE=true` (default)
+2. **Force activation** via `USE_PUBSUB_MOCK=true`
 
-### Пример локальной разработки
+### Local Development Example
 
-Создайте `.env` файл для локальной разработки:
+Create a `.env` file for local development:
 
 ```env
-# Включить debug режим (автоматически активирует мок)
+# Enable debug mode (automatically activates mock)
 SENSORGATE_DEBUG=true
 
-# API ключи для тестирования
+# API keys for testing
 SENSORGATE_API_KEYS=dev-key-123,test-key-456
 
-# Минимальные настройки (для мока не критичны)
+# Minimal settings (not critical for mock)
 SENSORGATE_GCP_PROJECT_ID=mock-project
 SENSORGATE_INFLUXDB_TOKEN=mock-token
 SENSORGATE_INFLUXDB_ORG=mock-org
 ```
 
-## Debug API эндпоинты
+## Debug API Endpoints
 
-### Просмотр всех сообщений
+### View All Messages
 
 ```http
 GET /api/v1/debug/pubsub/messages
 X-API-Key: dev-key-123
 ```
 
-**Ответ:**
+**Response:**
 ```json
 {
   "messages": {
@@ -105,52 +105,52 @@ X-API-Key: dev-key-123
 }
 ```
 
-### Статистика по сообщениям
+### Message Statistics
 
 ```http
 GET /api/v1/debug/pubsub/stats
 X-API-Key: dev-key-123
 ```
 
-### Сообщения конкретного топика
+### Messages from Specific Topic
 
 ```http
 GET /api/v1/debug/pubsub/topic/sensor-temperature/messages
 X-API-Key: dev-key-123
 ```
 
-### Очистка сообщений
+### Clear Messages
 
 ```http
 DELETE /api/v1/debug/pubsub/messages
 X-API-Key: dev-key-123
 
-# Или только конкретный топик
+# Or only specific topic
 DELETE /api/v1/debug/pubsub/messages?topic_name=sensor-temperature
 ```
 
-### Конфигурация debug режима
+### Debug Mode Configuration
 
 ```http
 GET /api/v1/debug/config
 X-API-Key: dev-key-123
 ```
 
-## Примеры использования
+## Usage Examples
 
-### Python клиент для тестирования
+### Python Client for Testing
 
 ```python
 import requests
 import json
 from datetime import datetime
 
-# Настройки для локальной разработки
+# Settings for local development
 API_BASE_URL = "http://localhost:8000/api/v1"
 API_KEY = "dev-key-123"
 headers = {"X-API-Key": API_KEY}
 
-# Отправить тестовые данные
+# Send test data
 sensor_data = {
     "device_id": 12345,
     "sensor_type": "temperature",
@@ -160,44 +160,44 @@ sensor_data = {
     "timestamp": datetime.utcnow().isoformat() + "Z"
 }
 
-# Отправить данные (будут сохранены в мок)
+# Send data (will be saved in mock)
 response = requests.post(
     f"{API_BASE_URL}/sensors/data",
     headers=headers,
     json=sensor_data
 )
 
-print("Отправка:", response.status_code, response.json())
+print("Sending:", response.status_code, response.json())
 
-# Проверить что данные сохранились в моке
+# Check that data was saved in mock
 debug_response = requests.get(
     f"{API_BASE_URL}/debug/pubsub/messages",
     headers=headers
 )
 
-print("Сообщения в моке:", debug_response.json())
+print("Messages in mock:", debug_response.json())
 ```
 
-### Workflow локальной разработки
+### Local Development Workflow
 
-1. **Запуск в debug режиме:**
+1. **Start in debug mode:**
    ```bash
-   # Установить debug режим
+   # Set debug mode
    export SENSORGATE_DEBUG=true
    
-   # Запустить сервис
+   # Start service
    python main.py
    ```
 
-2. **Проверка активации мока:**
+2. **Check mock activation:**
    ```bash
    curl -X GET "http://localhost:8000/api/v1/health" \
      -H "X-API-Key: dev-key-123"
    
-   # В ответе должно быть: "using_mock": true
+   # Response should contain: "using_mock": true
    ```
 
-3. **Отправка тестовых данных:**
+3. **Send test data:**
    ```bash
    curl -X POST "http://localhost:8000/api/v1/sensors/data" \
      -H "Content-Type: application/json" \
@@ -212,170 +212,103 @@ print("Сообщения в моке:", debug_response.json())
      }'
    ```
 
-4. **Просмотр отправленных сообщений:**
+4. **View sent messages:**
    ```bash
    curl -X GET "http://localhost:8000/api/v1/debug/pubsub/messages" \
      -H "X-API-Key: dev-key-123"
    ```
 
-5. **Очистка данных для следующего теста:**
+5. **Clear data for next test:**
    ```bash
    curl -X DELETE "http://localhost:8000/api/v1/debug/pubsub/messages" \
      -H "X-API-Key: dev-key-123"
    ```
 
-## Тестирование
+## Performance
 
-### Unit тесты
+### Memory Limitations
 
-Включены полные unit тесты для мок Pub/Sub:
+Mock automatically limits the number of stored messages:
 
-```bash
-# Запуск тестов
-pytest tests/test_mock_pubsub.py -v
+- **Default**: 1000 messages per topic
+- **Automatic cleanup**: oldest messages are removed
+- **Configurable limits**: can be changed in mock code
 
-# Результат покажет все аспекты функциональности:
-# - Публикация сообщений
-# - Ограничения по памяти
-# - Статистика и очистка
-# - Обработка разных типов датчиков
-```
+### Memory and Performance
 
-### Integration тесты
+- **Memory**: ~1KB per message (depends on data size)
+- **Performance**: >10,000 messages/sec on typical PC
+- **Limits**: configurable constraints prevent memory leaks
 
-Мок отлично подходит для integration тестов:
+## Switching to Production
 
-```python
-def test_sensor_data_pipeline():
-    # Отправить данные через API
-    response = client.post("/api/v1/sensors/data", 
-                          headers={"X-API-Key": "test-key"}, 
-                          json=sensor_data)
-    
-    # Проверить что данные попали в "Pub/Sub"
-    debug_response = client.get("/api/v1/debug/pubsub/messages",
-                               headers={"X-API-Key": "test-key"})
-    
-    messages = debug_response.json()["messages"]
-    assert "sensor-temperature" in messages
-    assert len(messages["sensor-temperature"]) == 1
-```
+### Automatic Switching
 
-## Логирование
-
-### Структурированные логи
-
-Мок создает детальные логи всех операций:
-
-```json
-{
-  "timestamp": "2024-01-15T12:00:01.123Z",
-  "level": "info",
-  "logger": "MockPublisherClient",
-  "message": "Mock Pub/Sub message published",
-  "message_id": "mock-msg-1642248000-1",
-  "topic": "sensor-temperature",
-  "device_id": 12345,
-  "sensor_type": "temperature",
-  "value": 23.5
-}
-```
-
-### Мониторинг в реальном времени
-
-```bash
-# Просматривать логи в реальном времени
-tail -f logs/sensorgate.log | grep "Mock Pub/Sub"
-
-# Или с jq для красивого JSON
-tail -f logs/sensorgate.log | jq 'select(.logger | contains("Mock"))'
-```
-
-## Производительность
-
-### Ограничения памяти
-
-Мок автоматически ограничивает количество сохраняемых сообщений:
-
-- **По умолчанию**: 1000 сообщений на топик
-- **Автоматическая очистка**: удаляются самые старые сообщения
-- **Настраиваемые лимиты**: можно изменить в коде мока
-
-### Память и производительность
-
-- **Память**: ~1KB на сообщение (зависит от размера данных)
-- **Производительность**: >10,000 сообщений/сек на обычном ПК
-- **Лимиты**: настраиваемые ограничения предотвращают утечки памяти
-
-## Переключение на продакш
-
-### Автоматическое переключение
-
-При развертывании в продакшене:
+When deploying to production:
 
 ```env
-# Отключить debug режим
+# Disable debug mode
 SENSORGATE_DEBUG=false
 
-# Указать реальные GCP настройки
+# Specify real GCP settings
 SENSORGATE_GCP_PROJECT_ID=your-production-project
 SENSORGATE_GCP_CREDENTIALS_PATH=/path/to/production-key.json
 ```
 
-Мок автоматически отключится, и будет использоваться реальный GCP Pub/Sub.
+Mock will automatically disable, and real GCP Pub/Sub will be used.
 
-### Валидация переключения
+### Validate Switching
 
 ```bash
-# Проверить что используется реальный Pub/Sub
+# Check that real Pub/Sub is being used
 curl -X GET "https://your-production-domain/api/v1/health"
 
-# В ответе должно быть: "using_mock": false
+# Response should contain: "using_mock": false
 ```
 
 ## Troubleshooting
 
-### Мок не активируется
+### Mock Not Activating
 
-**Проблема**: Мок не включается в debug режиме
+**Problem**: Mock doesn't enable in debug mode
 
-**Решение**:
+**Solution**:
 ```env
-# Убедитесь что включены обе настройки
+# Make sure both settings are enabled
 SENSORGATE_DEBUG=true
 SENSORGATE_PUBSUB_MOCK_AUTO_ENABLE=true
 
-# Или принудительно включите мок
+# Or force enable mock
 SENSORGATE_USE_PUBSUB_MOCK=true
 ```
 
-### Debug эндпоинты недоступны
+### Debug Endpoints Unavailable
 
-**Проблема**: Debug эндпоинты возвращают 404
+**Problem**: Debug endpoints return 404
 
-**Решение**:
+**Solution**:
 ```env
-# Debug эндпоинты доступны только в debug режиме
+# Debug endpoints are only available in debug mode
 SENSORGATE_DEBUG=true
 ```
 
-### Сообщения не сохраняются
+### Messages Not Saving
 
-**Проблема**: Отправленные сообщения не появляются в debug API
+**Problem**: Sent messages don't appear in debug API
 
-**Решение**:
-1. Проверьте что мок активен: `/api/v1/health` → `"using_mock": true`
-2. Проверьте валидность API ключа
-3. Проверьте формат отправляемых данных
+**Solution**:
+1. Check that mock is active: `/api/v1/health` → `"using_mock": true`
+2. Check API key validity
+3. Check format of sent data
 
-## Заключение
+## Conclusion
 
-Мок GCP Pub/Sub обеспечивает:
+Mock GCP Pub/Sub provides:
 
-✅ **Удобство разработки** - нет необходимости в GCP аккаунте для локальных тестов  
-✅ **Полная совместимость** - работает как drop-in замена реального Pub/Sub  
-✅ **Богатая отладка** - детальные логи и debug API  
-✅ **Автоматическое переключение** - seamless переход между dev и prod  
-✅ **Производительность** - быстрое тестирование без сетевых задержек  
+✅ **Development Convenience** - no need for GCP account for local tests  
+✅ **Full Compatibility** - works as drop-in replacement for real Pub/Sub  
+✅ **Rich Debugging** - detailed logs and debug API  
+✅ **Automatic Switching** - seamless transition between dev and prod  
+✅ **Performance** - fast testing without network delays  
 
-Теперь локальная разработка SensorGate стала значительно проще и эффективнее!
+Now local SensorGate development has become significantly easier and more efficient!
