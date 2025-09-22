@@ -59,24 +59,23 @@ class Settings(BaseSettings):
         """Validate log level"""
         valid_levels = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
         if v.upper() not in valid_levels:
-            raise ValueError(f'Invalid log level. Must be one of: {valid_levels}')
+            raise ValueError(f'Log level must be one of: {valid_levels}')
         return v.upper()
 
     @property
     def sensor_topic_mapping(self) -> Dict[str, str]:
-        """Get mapping of sensor types to Pub/Sub topics"""
+        """Map sensor types to their respective Pub/Sub topics"""
         return {
             "temperature": self.pubsub_topic_temperature,
             "humidity": self.pubsub_topic_humidity,
             "ndir": self.pubsub_topic_ndir
         }
 
-    model_config = {
-        "env_file": ".env",
-        "env_file_encoding": "utf-8",
-        "case_sensitive": False,
-        "env_prefix": "SENSORGATE_"
-    }
+    class Config:
+        env_prefix = "SENSORGATE_"
+        case_sensitive = False
+        env_file = ".env"
+        env_file_encoding = "utf-8"
 
 
 # Global settings instance

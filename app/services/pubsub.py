@@ -140,7 +140,10 @@ class PubSubService:
 
         # Use real Pub/Sub service
         topic_path = self.get_topic_path(sensor_type)
-        message_data = json.dumps(data, default=str).encode('utf-8')
+
+        # Transform data to match Avro schema in cloud
+        transformed_data = self._transform_data_for_avro_schema(data)
+        message_data = json.dumps(transformed_data, default=str).encode('utf-8')
 
         try:
             message_id = self.circuit_breaker.call(
@@ -154,6 +157,27 @@ class PubSubService:
         except Exception as e:
             print('Error publishing message to Pub/Sub:', e)
             raise
+
+    def _transform_data_for_avro_schema(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Transform SensorGate data format to match cloud Avro schema"""
+        # New schema expects string timestamp, not microseconds
+        timestamp_value = data.get('timestamp')
+        if isinstance(timestamp_value, str):
+            # Keep as ISO string format as expected by schema
+            timestamp_str = timestamp_value
+        else:
+            # Convert to ISO string if it's not already
+            from datetime import datetime
+            timestamp_str = datetime.utcnow().isoformat() + "Z"
+
+        return {
+            "device_id": int(data.get('device_id', 0)),
+            "sensor_type": data.get('sensor_type', ''),
+            "value": float(data.get('value', 0.0)),
+            "latitude": float(data.get('latitude', 0.0)),
+            "longitude": float(data.get('longitude', 0.0)),
+            "timestamp": timestamp_str
+        }
 
     @retry(
         stop=stop_after_attempt(3),
